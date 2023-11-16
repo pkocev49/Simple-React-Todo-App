@@ -1,6 +1,6 @@
 const initialState = {
   todoName: "",
-  todos: [],
+  todos: JSON.parse(localStorage.getItem("todos")) || [],
 };
 
 export const todoReducer = (state = initialState, action) => {
@@ -11,28 +11,36 @@ export const todoReducer = (state = initialState, action) => {
         todoName: action.payload,
       };
     case "ADD_TODO":
+      const newTodos = [...state.todos, action.payload];
+      localStorage.setItem("todos", JSON.stringify(newTodos));
       return {
         ...state,
-        todos: [...state.todos, action.payload],
+        todos: newTodos,
         todoName: "",
       };
     case "DELETE_TODO":
+      const updatedTodos = state.todos.filter(
+        (todo) => todo.id !== action.payload
+      );
+      localStorage.setItem("todos", JSON.stringify(updatedTodos));
       return {
         ...state,
-        todos: state.todos.filter((todo) => todo.id !== action.payload),
+        todos: updatedTodos,
       };
     case "TOGGLE_TODO_STATUS":
+      const toggledTodos = state.todos.map((todo) => {
+        if (todo.id === action.payload) {
+          return {
+            ...todo,
+            isComplete: !todo.isComplete,
+          };
+        }
+        return todo;
+      });
+      localStorage.setItem("todos", JSON.stringify(toggledTodos));
       return {
         ...state,
-        todos: state.todos.map((todo) => {
-          if (todo.id === action.payload) {
-            return {
-              ...todo,
-              isComplete: !todo.isCompleted,
-            };
-          }
-          return todo;
-        }),
+        todos: toggledTodos,
       };
     default:
       return state;
